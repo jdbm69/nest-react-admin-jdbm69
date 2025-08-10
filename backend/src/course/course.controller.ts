@@ -8,6 +8,7 @@ import {
   Put,
   Query,
   UseGuards,
+  Inject
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
@@ -23,6 +24,7 @@ import { CreateCourseDto, UpdateCourseDto } from './course.dto';
 import { Course } from './course.entity';
 import { CourseQuery } from './course.query';
 import { CourseService } from './course.service';
+import { forwardRef } from '@nestjs/common';
 
 @Controller('courses')
 @ApiBearerAuth()
@@ -31,6 +33,7 @@ import { CourseService } from './course.service';
 export class CourseController {
   constructor(
     private readonly courseService: CourseService,
+    @Inject(forwardRef(() => ContentService))
     private readonly contentService: ContentService,
   ) {}
 

@@ -1,34 +1,35 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { AxiosError } from 'axios';
 import { useState } from 'react';
 import { Loader, Plus, X } from 'react-feather';
 import { useForm } from 'react-hook-form';
-import { useQuery } from 'react-query';
 
 import CoursesTable from '../components/courses/CoursesTable';
 import Layout from '../components/layout';
 import Modal from '../components/shared/Modal';
 import useAuth from '../hooks/useAuth';
-import CreateCourseRequest from '../models/course/CreateCourseRequest';
+import type CreateCourseRequest from '../models/course/CreateCourseRequest';
 import courseService from '../services/CourseService';
 
 export default function Courses() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
 
-  const [addCourseShow, setAddCourseShow] = useState<boolean>(false);
-  const [error, setError] = useState<string>();
+  const [addCourseShow, setAddCourseShow] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  const queryClient = useQueryClient();
   const { authenticatedUser } = useAuth();
-  const { data, isLoading } = useQuery(
-    ['courses', name, description],
-    () =>
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['courses', { name, description }],
+    queryFn: () =>
       courseService.findAll({
         name: name || undefined,
         description: description || undefined,
       }),
-    {
-      refetchInterval: 1000,
-    },
-  );
+    refetchInterval: 1000,
+  });
 
   const {
     register,
@@ -37,14 +38,18 @@ export default function Courses() {
     reset,
   } = useForm<CreateCourseRequest>();
 
-  const saveCourse = async (createCourseRequest: CreateCourseRequest) => {
+  const saveCourse = async (payload: CreateCourseRequest) => {
     try {
-      await courseService.save(createCourseRequest);
+      await courseService.save(payload);
       setAddCourseShow(false);
       reset();
       setError(null);
-    } catch (error) {
-      setError(error.response.data.message);
+
+      // Refresca todas las queries que empiezan con 'courses' (incluye las con filtros)
+      queryClient.invalidateQueries({ queryKey: ['courses'], exact: false });
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ message?: string }>;
+      setError(axiosErr.response?.data?.message ?? 'Unexpected error');
     }
   };
 
@@ -52,6 +57,7 @@ export default function Courses() {
     <Layout>
       <h1 className="font-semibold text-3xl mb-5">Manage Courses</h1>
       <hr />
+
       {authenticatedUser.role !== 'user' ? (
         <button
           className="btn my-5 flex gap-2 w-full sm:w-auto justify-center"
@@ -82,7 +88,7 @@ export default function Courses() {
 
       <CoursesTable data={data} isLoading={isLoading} />
 
-      {/* Add User Modal */}
+      {/* Add Course Modal */}
       <Modal show={addCourseShow}>
         <div className="flex">
           <h1 className="font-semibold mb-3">Add Course</h1>
@@ -125,11 +131,11 @@ export default function Courses() {
               'Save'
             )}
           </button>
-          {error ? (
+          {error && (
             <div className="text-red-500 p-3 font-semibold border rounded-md bg-red-50">
               {error}
             </div>
-          ) : null}
+          )}
         </form>
       </Modal>
     </Layout>

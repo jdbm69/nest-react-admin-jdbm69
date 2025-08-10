@@ -1,13 +1,14 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { AxiosError } from 'axios';
 import { useState } from 'react';
 import { Loader, Plus, X } from 'react-feather';
 import { useForm } from 'react-hook-form';
-import { useQuery } from 'react-query';
 
 import Layout from '../components/layout';
 import Modal from '../components/shared/Modal';
 import UsersTable from '../components/users/UsersTable';
 import useAuth from '../hooks/useAuth';
-import CreateUserRequest from '../models/user/CreateUserRequest';
+import type CreateUserRequest from '../models/user/CreateUserRequest';
 import userService from '../services/UserService';
 
 export default function Users() {
@@ -18,25 +19,23 @@ export default function Users() {
   const [username, setUsername] = useState('');
   const [role, setRole] = useState('');
 
-  const [addUserShow, setAddUserShow] = useState<boolean>(false);
-  const [error, setError] = useState<string>();
+  const [addUserShow, setAddUserShow] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery(
-    ['users', firstName, lastName, username, role],
-    async () => {
-      return (
-        await userService.findAll({
-          firstName: firstName || undefined,
-          lastName: lastName || undefined,
-          username: username || undefined,
-          role: role || undefined,
-        })
-      ).filter((user) => user.id !== authenticatedUser.id);
-    },
-    {
-      refetchInterval: 1000,
-    },
-  );
+  const queryClient = useQueryClient();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['users', { firstName, lastName, username, role }],
+    queryFn: () =>
+      userService.findAll({
+        firstName: firstName || undefined,
+        lastName: lastName || undefined,
+        username: username || undefined,
+        role: role || undefined,
+      }),
+
+    select: (users) => users.filter((u) => u.id !== authenticatedUser.id),
+  });
 
   const {
     register,
@@ -45,14 +44,17 @@ export default function Users() {
     reset,
   } = useForm<CreateUserRequest>();
 
-  const saveUser = async (createUserRequest: CreateUserRequest) => {
+  const saveUser = async (payload: CreateUserRequest) => {
     try {
-      await userService.save(createUserRequest);
+      await userService.save(payload);
       setAddUserShow(false);
       setError(null);
       reset();
-    } catch (error) {
-      setError(error.response.data.message);
+
+      queryClient.invalidateQueries({ queryKey: ['users'], exact: false });
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ message?: string }>;
+      setError(axiosErr.response?.data?.message ?? 'Unexpected error');
     }
   };
 
@@ -93,8 +95,6 @@ export default function Users() {
             onChange={(e) => setUsername(e.target.value)}
           />
           <select
-            name=""
-            id=""
             className="input w-1/2"
             value={role}
             onChange={(e) => setRole(e.target.value)}
@@ -181,11 +181,11 @@ export default function Users() {
               'Save'
             )}
           </button>
-          {error ? (
+          {error && (
             <div className="text-red-500 p-3 font-semibold border rounded-md bg-red-50">
               {error}
             </div>
-          ) : null}
+          )}
         </form>
       </Modal>
     </Layout>

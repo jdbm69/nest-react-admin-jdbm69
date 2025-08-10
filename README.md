@@ -1,4 +1,4 @@
-# Admin Panel Project
+# NestJS + React Admin Panel
 
 # Assumptions
 
@@ -66,7 +66,7 @@ You can run the entire app using docker compose.
 On root directory
 
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
 
 Application will be deployed on http://localhost:3000

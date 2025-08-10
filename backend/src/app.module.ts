@@ -10,15 +10,40 @@ import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
+    // Variables de entorno disponibles globalmente
     ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRoot(),
+
+    // Configuración de TypeORM leída desde ENV
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ({
+        type: 'postgres',
+        host: process.env.DATABASE_HOST,
+        port: Number(process.env.DATABASE_PORT ?? 5432),
+        username: process.env.DATABASE_USERNAME,
+        password: process.env.DATABASE_PASSWORD,
+        database: process.env.DATABASE_NAME,
+
+        // Importante: apunta a los .js compilados en dist
+        entities: [__dirname + '/**/*.entity{.js}'],
+
+        // En desarrollo/Poc
+        synchronize: true,
+
+        // Si tienes módulos con forFeature, esto los registra
+        autoLoadEntities: true,
+
+        // Reintentos para dar tiempo a la DB
+        retryAttempts: 10,
+        retryDelay: 5000,
+      }),
+    }),
+
     UserModule,
     AuthModule,
     CourseModule,
     ContentModule,
     StatsModule,
   ],
-  controllers: [],
-  providers: [],
 })
+
 export class AppModule {}

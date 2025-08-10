@@ -6,20 +6,26 @@ import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { Role } from './enums/role.enum';
-import { User } from './user/user.entity';
+import { User } from './user/user.entity'; 
+import { getConnection } from 'typeorm';
 
 async function createAdminOnFirstUse() {
-  const admin = await User.findOne({ where: { username: 'admin' } });
+  const connection = getConnection(); 
+  const userRepo = connection.getRepository(User);
 
+  const admin = await userRepo.findOne({ where: { username: 'admin' } });
   if (!admin) {
-    await User.create({
+    const hashed = await bcrypt.hash('admin123', 10);
+    const newAdmin = userRepo.create({
       firstName: 'admin',
       lastName: 'admin',
       isActive: true,
       username: 'admin',
       role: Role.Admin,
-      password: await bcrypt.hash('admin123', 10),
-    }).save();
+      password: hashed,
+    });
+    await userRepo.save(newAdmin);
+    console.log('✔ Admin seed creado');
   }
 }
 
@@ -38,8 +44,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/api/docs', app, document);
 
+  // Esperar a que los módulos y la conexión estén listos
+  await app.init();
+
   await createAdminOnFirstUse();
 
   await app.listen(5000);
+  console.log('API listening on :5000');
 }
 bootstrap();

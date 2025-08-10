@@ -4,7 +4,7 @@ import AuthResponse from '../models/auth/AuthResponse';
 import LoginRequest from '../models/auth/LoginRequest';
 import apiService from './ApiService';
 
-class AuthService {
+export class AuthService {
   async login(loginRequest: LoginRequest): Promise<AuthResponse> {
     const authResponse = (
       await axios.post<AuthResponse>('/api/auth/login', loginRequest, {
@@ -33,4 +33,5 @@ class AuthService {
   }
 }
 
-export default new AuthService();
+const authServiceInstance = new AuthService();
+export default authServiceInstance;

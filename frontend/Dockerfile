@@ -9,9 +9,9 @@ RUN yarn build
 
 #---
 
-FROM nginx:alpine
+FROM caddy:2-alpine
 
-COPY --from=build /app/build/ /var/www
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY --from=build /app/build /usr/share/caddy
+COPY Caddyfile /etc/caddy/Caddyfile
 
 EXPOSE 80

@@ -1,7 +1,8 @@
+import { useQuery } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { useState } from 'react';
 import { Loader } from 'react-feather';
 import { useForm } from 'react-hook-form';
-import { useQuery } from 'react-query';
 
 import useAuth from '../../hooks/useAuth';
 import UpdateUserRequest from '../../models/user/UpdateUserRequest';
@@ -9,12 +10,12 @@ import userService from '../../services/UserService';
 
 export default function UpdateProfile() {
   const { authenticatedUser } = useAuth();
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<string | null>(null);
 
-  const { data, isLoading, refetch } = useQuery(
-    `user-${authenticatedUser.id}`,
-    () => userService.findOne(authenticatedUser.id),
-  );
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['user', authenticatedUser.id],
+    queryFn: () => userService.findOne(authenticatedUser.id),
+  });
 
   const {
     register,
@@ -25,19 +26,20 @@ export default function UpdateProfile() {
 
   const handleUpdateUser = async (updateUserRequest: UpdateUserRequest) => {
     try {
-      if (updateUserRequest.username === data.username) {
+      if (data && updateUserRequest.username === data.username) {
         delete updateUserRequest.username;
       }
       await userService.update(authenticatedUser.id, updateUserRequest);
       setError(null);
       setValue('password', '');
       refetch();
-    } catch (error) {
-      setError(error.response.data.message);
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ message?: string }>;
+      setError(axiosErr.response?.data?.message ?? 'Unexpected error');
     }
   };
 
-  if (!isLoading) {
+  if (!isLoading && data) {
     return (
       <div className="card shadow">
         <form
@@ -70,6 +72,7 @@ export default function UpdateProfile() {
               />
             </div>
           </div>
+
           <div className="w-full">
             <label className="font-semibold">Username</label>
             <input
@@ -81,6 +84,7 @@ export default function UpdateProfile() {
               {...register('username')}
             />
           </div>
+
           <div className="w-full">
             <label className="font-semibold">Password</label>
             <input
@@ -91,6 +95,7 @@ export default function UpdateProfile() {
               {...register('password')}
             />
           </div>
+
           <button className="btn w-full" disabled={isSubmitting}>
             {isSubmitting ? (
               <Loader className="animate-spin mx-auto" />
@@ -98,11 +103,12 @@ export default function UpdateProfile() {
               'Update'
             )}
           </button>
-          {error ? (
+
+          {error && (
             <div className="text-red-500 p-3 font-semibold border rounded-md bg-red-50">
               {error}
             </div>
-          ) : null}
+          )}
         </form>
       </div>
     );

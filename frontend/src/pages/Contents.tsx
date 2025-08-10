@@ -1,27 +1,46 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { AxiosError } from 'axios';
 import { useState } from 'react';
 import { Loader, Plus, X } from 'react-feather';
 import { useForm } from 'react-hook-form';
-import { useQuery } from 'react-query';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 
 import ContentsTable from '../components/content/ContentsTable';
 import Layout from '../components/layout';
 import Modal from '../components/shared/Modal';
 import useAuth from '../hooks/useAuth';
-import CreateContentRequest from '../models/content/CreateContentRequest';
+import type CreateContentRequest from '../models/content/CreateContentRequest';
 import contentService from '../services/ContentService';
 import courseService from '../services/CourseService';
 
 export default function Course() {
   const { id } = useParams<{ id: string }>();
   const { authenticatedUser } = useAuth();
+  const queryClient = useQueryClient();
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [addContentShow, setAddContentShow] = useState<boolean>(false);
-  const [error, setError] = useState<string>();
+  const [addContentShow, setAddContentShow] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const userQuery = useQuery('user', async () => courseService.findOne(id));
+  // Detalle del curso
+  const courseQuery = useQuery({
+    queryKey: ['course', id],
+    queryFn: () => courseService.findOne(id as string),
+    enabled: !!id,
+  });
+
+  // Listado de contenidos (filtrable)
+  const { data, isLoading } = useQuery({
+    queryKey: ['contents', id, { name, description }],
+    queryFn: () =>
+      contentService.findAll(id as string, {
+        name: name || undefined,
+        description: description || undefined,
+      }),
+    enabled: !!id,
+    refetchInterval: 1000, // si quieres, lo podemos quitar y usar solo invalidate
+  });
 
   const {
     register,
@@ -30,35 +49,30 @@ export default function Course() {
     reset,
   } = useForm<CreateContentRequest>();
 
-  const { data, isLoading } = useQuery(
-    [`contents-${id}`, name, description],
-    async () =>
-      contentService.findAll(id, {
-        name: name || undefined,
-        description: description || undefined,
-      }),
-    {
-      refetchInterval: 1000,
-    },
-  );
-
-  const saveCourse = async (createContentRequest: CreateContentRequest) => {
+  const saveCourse = async (payload: CreateContentRequest) => {
     try {
-      await contentService.save(id, createContentRequest);
+      await contentService.save(id as string, payload);
       setAddContentShow(false);
       reset();
       setError(null);
-    } catch (error) {
-      setError(error.response.data.message);
+
+      // refrescamos la lista (mejor que esperar al refetchInterval)
+      queryClient.invalidateQueries({ queryKey: ['contents', id] });
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ message?: string }>;
+      setError(axiosErr.response?.data?.message ?? 'Unexpected error');
     }
   };
 
   return (
     <Layout>
       <h1 className="font-semibold text-3xl mb-5">
-        {!userQuery.isLoading ? `${userQuery.data.name} Contents` : ''}
+        {!courseQuery.isLoading && courseQuery.data
+          ? `${courseQuery.data.name} Contents`
+          : ''}
       </h1>
       <hr />
+
       {authenticatedUser.role !== 'user' ? (
         <button
           className="btn my-5 flex gap-2 w-full sm:w-auto justify-center"
@@ -87,9 +101,13 @@ export default function Course() {
         </div>
       </div>
 
-      <ContentsTable data={data} isLoading={isLoading} courseId={id} />
+      <ContentsTable
+        data={data}
+        isLoading={isLoading}
+        courseId={id as string}
+      />
 
-      {/* Add User Modal */}
+      {/* Add Content Modal */}
       <Modal show={addContentShow}>
         <div className="flex">
           <h1 className="font-semibold mb-3">Add Content</h1>
@@ -132,11 +150,11 @@ export default function Course() {
               'Save'
             )}
           </button>
-          {error ? (
+          {error && (
             <div className="text-red-500 p-3 font-semibold border rounded-md bg-red-50">
               {error}
             </div>
-          ) : null}
+          )}
         </form>
       </Modal>
     </Layout>

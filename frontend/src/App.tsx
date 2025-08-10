@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
+import { AuthRoute, PrivateRoute } from './Guards';
 import useAuth from './hooks/useAuth';
 import Contents from './pages/Contents';
 import Courses from './pages/Courses';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Users from './pages/Users';
-import { AuthRoute, PrivateRoute } from './Route';
 import authService from './services/AuthService';
 
 export default function App() {
@@ -35,14 +35,24 @@ export default function App() {
 
   return isLoaded ? (
     <Router>
-      <Switch>
-        <PrivateRoute exact path="/" component={Dashboard} />
-        <PrivateRoute exact path="/users" component={Users} roles={['admin']} />
-        <PrivateRoute exact path="/courses" component={Courses} />
-        <PrivateRoute exact path="/courses/:id" component={Contents} />
+      <Routes>
+        {/* Rutas protegidas */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/:id" element={<Contents />} />
+        </Route>
 
-        <AuthRoute exact path="/login" component={Login} />
-      </Switch>
+        {/* Rutas protegidas solo para admin */}
+        <Route element={<PrivateRoute roles={['admin']} />}>
+          <Route path="/users" element={<Users />} />
+        </Route>
+
+        {/* Rutas públicas */}
+        <Route element={<AuthRoute />}>
+          <Route path="/login" element={<Login />} />
+        </Route>
+      </Routes>
     </Router>
   ) : null;
 }

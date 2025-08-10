@@ -7,4 +7,5 @@ class StatsService {
   }
 }
 
-export default new StatsService();
+const StatsServiceInstance = new StatsService();
+export default StatsServiceInstance;

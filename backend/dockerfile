@@ -1,32 +1,20 @@
-FROM node:alpine as build
-
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-COPY package.json .
-COPY yarn.lock .
-
-RUN yarn
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 COPY . .
-
 RUN yarn build
 
-#---
-
-FROM node:alpine
-
+FROM node:20-alpine AS runner
 WORKDIR /app
-
 ENV NODE_ENV=production
 
-COPY package.json .
-COPY yarn.lock .
-COPY ormconfig.js .
+COPY package.json yarn.lock ./
+RUN yarn install --production --frozen-lockfile && yarn cache clean
 
-RUN yarn install --production
-
-COPY --from=build /app/dist ./dist
+COPY --from=builder /app/dist ./dist
 
 EXPOSE 5000
-
-ENTRYPOINT [ "yarn", "start:prod" ]
+CMD ["node", "dist/main.js"]
