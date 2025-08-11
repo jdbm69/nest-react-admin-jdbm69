@@ -2,6 +2,8 @@ import { BookOpen, Home, LogOut, Users } from 'react-feather';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
+import sideMenuBg from '../../assets/sidemenu-bg.jpg';
+import sideLogo from '../../assets/urbano-logo-white.png';
 import useAuth from '../../hooks/useAuth';
 import authService from '../../services/AuthService';
 import SidebarItem from './SidebarItem';
@@ -22,11 +24,17 @@ export default function Sidebar({ className }: SidebarProps) {
   };
 
   return (
-    <div className={'sidebar ' + className}>
-      <Link to="/" className="no-underline text-black">
-        <h1 className="font-semibold text-center">Carna Project</h1>
-      </Link>
-      <nav className="mt-5 flex flex-col gap-3 flex-grow">
+    <div
+      className={'sidebar ' + className}
+      style={{
+        backgroundImage: `url(${sideMenuBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <Link to="/" className="no-underline text-black"></Link>
+      <img src={sideLogo} alt="urbano" style={{ paddingBottom: '2rem' }} />
+      <nav className="mt-5 flex flex-col gap-3 flex-grow items-center">
         <SidebarItem to="/">
           <Home /> Dashboard
         </SidebarItem>
@@ -40,7 +48,7 @@ export default function Sidebar({ className }: SidebarProps) {
         ) : null}
       </nav>
       <button
-        className="text-red-500 rounded-md p-3 transition-colors flex gap-3 justify-center items-center font-semibold focus:outline-none"
+        className="text-white hover:text-black rounded-md p-3 transition-colors flex gap-3 justify-center items-center font-semibold focus:outline-none"
         onClick={handleLogout}
       >
         <LogOut /> Logout

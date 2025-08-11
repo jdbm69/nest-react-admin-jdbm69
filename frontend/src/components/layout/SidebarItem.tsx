@@ -14,11 +14,15 @@ export default function SidebarItem({
   active = false,
 }: SidebarItemProps) {
   return (
-    <Link
-      to={to}
-      className="no-underline text-black hover:bg-gray-300 rounded-md p-3 transition-colors"
-    >
-      <span className="flex gap-5 font-semibold">
+    <Link to={to} className="link-nav">
+      <span
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          gap: '1rem',
+        }}
+      >
         {children} {active ? <ChevronRight /> : null}
       </span>
     </Link>

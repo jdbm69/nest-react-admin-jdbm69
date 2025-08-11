@@ -5,26 +5,39 @@
 @layer base {
   html, body, #root {
     @apply h-full;
+    --brand-primary: #c1292e;
+    --brand-hover: #651416;
+    --brand-header-background: #e2e1e1;
+    --primary-white: #ffffff;
+    --white-hover: #f2f2f2;
   }
 
   h1 { @apply text-2xl; }
   h2 { @apply text-xl; }
   h3 { @apply text-lg; }
 
-  a { @apply text-blue-600 underline; }
+  a { @apply text-brand-primary underline; }
 }
 
 @layer components {
   .btn {
-    @apply p-3 rounded-md text-white bg-blue-500 transition-all
-           hover:bg-blue-700 focus:outline-none focus:ring
+    @apply p-3 rounded-md text-primary-white bg-brand-primary transition-all
+          hover:bg-brand-hover focus:outline-none focus:ring focus:ring-brand-primary focus:ring-opacity-30;
   }
 
-  .btn.danger { @apply bg-red-500 hover:bg-red-700; }
+  .link-nav {
+    @apply rounded-md bg-brand-primary w-48 h-12 pt-3 mb-3
+    hover:bg-brand-hover text-white transition-colors duration-200 no-underline;
+  }
+
+  .btn.danger {
+    @apply text-primary-white bg-brand-primary hover:bg-brand-hover;
+  }
 
   .input {
     @apply rounded-md border-gray-300 transition-colors
-           focus:border-blue-500 focus:ring
+          bg-primary-white
+          focus:border-brand-primary focus:ring focus:ring-brand-primary focus:ring-opacity-30;
   }
 
   .card { @apply p-5 rounded-md bg-white border; }

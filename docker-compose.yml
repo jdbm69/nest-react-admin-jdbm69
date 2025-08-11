@@ -41,17 +41,5 @@ services:
       - "5000:5000"
     restart: unless-stopped
 
-  frontend:
-    container_name: frontend
-    build:
-      context: ./frontend
-      args:
-        - REACT_APP_API_URL=http://localhost:5000/api
-    depends_on:
-      - backend
-    ports:
-      - "3000:80"
-    restart: unless-stopped
-
 volumes:
   db_data:
