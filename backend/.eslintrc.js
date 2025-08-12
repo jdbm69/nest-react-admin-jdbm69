@@ -1,3 +1,14 @@
+/*
+Cambios en configuración ESLint:
+
+- Se agregó 'tsconfigRootDir: __dirname' en parserOptions para mejor resolución.
+- Se agregó el plugin 'import' y 'prettier' junto con sus configuraciones.
+- Se incluyó la extensión 'plugin:import/typescript' y reemplazó 'prettier/@typescript-eslint' por 'prettier'.
+- Se añadieron settings para 'import/resolver' con TypeScript y tsconfig.
+- Se extendió ignorePatterns para incluir 'dist' y 'node_modules'.
+- Se agregó regla 'prettier/prettier': 'error' para forzar formato prettier.
+*/
+
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',

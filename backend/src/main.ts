@@ -1,3 +1,15 @@
+/**
+ * Actualización en main.ts para mejorar el manejo de la conexión y el repositorio usando TypeORM.
+ * Se reemplaza el acceso directo al Entity con consultas a través del repositorio obtenido
+ * con getConnection(). Esto mejora la compatibilidad con futuras versiones y permite un mejor control.
+ * 
+ * Se agrega un console.log para confirmar creación del admin en la primera ejecución.
+ * También se espera explícitamente a que la app esté inicializada (await app.init()) antes
+ * de intentar crear el admin, asegurando que la conexión a la base de datos esté lista.
+ * 
+ * Se mantiene la configuración Swagger y middleware igual, con mejoras en mensajes de log.
+ */
+
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -44,7 +56,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/api/docs', app, document);
 
-  // Esperar a que los módulos y la conexión estén listos
+  // Espera a que los módulos y la conexión estén listos
   await app.init();
 
   await createAdminOnFirstUse();

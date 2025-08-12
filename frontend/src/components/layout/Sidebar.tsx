@@ -1,3 +1,16 @@
+/*
+  Actualización del componente Sidebar:
+
+  - Se reemplazó el hook `useHistory` por el más moderno `useNavigate` de `react-router-dom` v6 para manejo de navegación programática.
+  - Se agregó un fondo visual al sidebar usando una imagen (`sideMenuBg`) con estilos CSS en línea para mejorar la estética.
+  - Se añadió un logo en la parte superior del sidebar con la imagen `sideLogo` y un padding inferior para mejor separación visual.
+  - El menú de navegación ahora centra sus elementos con `items-center`.
+  - Los estilos de texto y botones se ajustaron para mejorar la legibilidad sobre el fondo (texto blanco, hover, etc).
+  - El botón de logout mantiene la funcionalidad de cerrar sesión, limpiar estado y redirigir al login.
+  - Se mantiene la condición para mostrar el link de usuarios solo a admins.
+  - Código más limpio y actualizado para compatibilidad con React Router v6 y diseño visual mejorado.
+*/
+
 import { BookOpen, Home, LogOut, Users } from 'react-feather';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';

@@ -1,3 +1,14 @@
+/**
+ * Componente UpdateProfile actualizado:
+ * - Usa `useQuery` de '@tanstack/react-query' con formato objeto para mayor claridad.
+ * - Maneja estado de error tipado como `string | null` y se inicializa en null.
+ * - Verifica que `data` exista antes de comparar usernames para evitar errores.
+ * - Captura errores con tipado `AxiosError` para mostrar mensajes precisos.
+ * - Renderiza el formulario solo si `data` está disponible.
+ * - Muestra mensaje de error solo cuando existe error.
+ * - Mantiene botón con loader animado y deshabilitado mientras se envía.
+ */
+
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useState } from 'react';

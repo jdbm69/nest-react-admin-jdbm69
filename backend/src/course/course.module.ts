@@ -1,3 +1,10 @@
+/**
+ * Integración con TypeORM para la entidad Course.
+ * Ahora se puede inyectar su repositorio en CourseService
+ * y exportarlo a otros módulos mediante TypeOrmModule.forFeature([Course]).
+ * Se mantiene forwardRef para evitar dependencias circulares con ContentModule.
+ */
+
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 

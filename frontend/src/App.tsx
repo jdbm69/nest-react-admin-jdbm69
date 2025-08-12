@@ -1,3 +1,14 @@
+/**
+ * Actualización principal del componente App para React Router v6
+ *
+ * - Se reemplaza <Switch> por <Routes> y se ajusta la sintaxis de rutas.
+ * - Uso de rutas anidadas con <Route element={...}> para proteger rutas con guards.
+ * - Separación de rutas protegidas normales y rutas con roles (admin).
+ * - Importación y uso actualizado de PrivateRoute y AuthRoute desde 'Guards'.
+ * - Mantiene lógica de autenticación y refresco de token con useAuth.
+ * - Mejora la legibilidad y compatibilidad con la nueva API de React Router.
+ */
+
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 

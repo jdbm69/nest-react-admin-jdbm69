@@ -1,3 +1,12 @@
+# Cambios en Dockerfile:
+# - Actualización de la imagen base de 'node:alpine' a 'node:20-alpine' para usar una versión más reciente y estable.
+# - Renombrar etapas: 'build' → 'builder' y 'final' → 'runner' para mayor claridad.
+# - Copiar package.json y yarn.lock en una sola línea para optimizar capas.
+# - Usar '--frozen-lockfile' en 'yarn install' para asegurar coherencia con yarn.lock.
+# - En etapa runner, limpiar caché con 'yarn cache clean' después de instalar dependencias de producción.
+# - Eliminar copia de 'ormconfig.js' porque la configuración ahora se maneja desde el código.
+# - Cambiar comando final de 'ENTRYPOINT [ "yarn", "start:prod" ]' a 'CMD ["node", "dist/main.js"]'.
+
 FROM node:20-alpine AS builder
 WORKDIR /app
 

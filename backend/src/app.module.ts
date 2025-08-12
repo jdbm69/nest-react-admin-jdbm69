@@ -1,3 +1,11 @@
+/**
+ * Configuración dinámica de TypeORM usando forRootAsync.
+ * La configuración antes ubicada en ormconfig se movió aquí,
+ * eliminando el archivo ormconfig y centralizando la conexión en AppModule.
+ * Lee datos de conexión desde variables de entorno, habilita autoLoadEntities
+ * y agrega reintentos automáticos de conexión para mayor flexibilidad.
+ */
+
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -23,13 +31,10 @@ import { UserModule } from './user/user.module';
         password: process.env.DATABASE_PASSWORD,
         database: process.env.DATABASE_NAME,
 
-        // Importante: apunta a los .js compilados en dist
         entities: [__dirname + '/**/*.entity{.js}'],
 
-        // En desarrollo/Poc
         synchronize: true,
 
-        // Si tienes módulos con forFeature, esto los registra
         autoLoadEntities: true,
 
         // Reintentos para dar tiempo a la DB

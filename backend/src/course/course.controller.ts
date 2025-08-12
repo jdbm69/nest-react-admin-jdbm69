@@ -1,3 +1,10 @@
+/**
+ * Se actualiza CourseController para inyectar ContentService
+ * utilizando @Inject(forwardRef(() => ContentService)), resolviendo
+ * la dependencia circular con CourseService y manteniendo la funcionalidad.
+ * También se agregan las importaciones necesarias de Inject y forwardRef.
+ */
+
 import {
   Body,
   Controller,
